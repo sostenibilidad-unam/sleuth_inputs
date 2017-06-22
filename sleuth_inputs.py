@@ -27,7 +27,8 @@ import resources
 # Import the code for the dialog
 from sleuth_inputs_dialog import SleuthInputsDialog
 import os.path
-
+import os
+from qgis.core import QgsVectorLayer
 
 class SleuthInputs:
     """QGIS Plugin Implementation."""
@@ -66,6 +67,13 @@ class SleuthInputs:
         self.toolbar = self.iface.addToolBar(u'SleuthInputs')
         self.toolbar.setObjectName(u'SleuthInputs')
 
+    def rasters_path(self):
+        openFile = QFileDialog()
+        fname = QFileDialog.getExistingDirectory(self.dlg, ("Select Output Folder"), '')
+        for f in os.listdir(fname):
+            self.dlg.textBrowser.append(f)
+        
+        
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
         """Get the translation for a string using Qt translation API.
@@ -167,6 +175,23 @@ class SleuthInputs:
             text=self.tr(u''),
             callback=self.run,
             parent=self.iface.mainWindow())
+
+        self.dlg.pushButton.clicked.connect(self.rasters_path)
+        self.dlg.pushButton_2.clicked.connect(self.get_mask)
+        
+        
+    def get_mask(self):
+        openFile = QFileDialog()
+        fname = QFileDialog.getOpenFileName(self.dlg, ("Select shape file"), '')
+        
+        layer = QgsVectorLayer(fname, "sub", "ogr")
+        features = layer.getFeatures()
+
+        idx = layer.fieldNameIndex('location')
+        
+        for feat in features:
+            attrs = feat.attributes()
+            self.dlg.textBrowser.append(attrs[idx])
 
 
     def unload(self):

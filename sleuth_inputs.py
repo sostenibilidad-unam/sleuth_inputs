@@ -29,6 +29,9 @@ from sleuth_inputs_dialog import SleuthInputsDialog
 import os.path
 import os
 from qgis.core import QgsVectorLayer
+from clip import clip
+from os.path import dirname, join, basename
+from os import mkdir
 
 class SleuthInputs:
     """QGIS Plugin Implementation."""
@@ -65,14 +68,7 @@ class SleuthInputs:
         self.menu = self.tr(u'&Sleuth Inputs')
         # TODO: We are going to let the user set this up in a future iteration
         self.toolbar = self.iface.addToolBar(u'SleuthInputs')
-        self.toolbar.setObjectName(u'SleuthInputs')
-
-    def rasters_path(self):
-        openFile = QFileDialog()
-        fname = QFileDialog.getExistingDirectory(self.dlg, ("Select Output Folder"), '')
-        for f in os.listdir(fname):
-            self.dlg.textBrowser.append(f)
-        
+        self.toolbar.setObjectName(u'SleuthInputs')        
         
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -178,20 +174,37 @@ class SleuthInputs:
 
         self.dlg.pushButton.clicked.connect(self.rasters_path)
         self.dlg.pushButton_2.clicked.connect(self.get_mask)
+
         
+    def rasters_path(self):
+        self.rasters = []
+        openFile = QFileDialog()
+        self.rasters_path = QFileDialog.getExistingDirectory(self.dlg, ("Select Output Folder"), '')
+        for f in os.listdir(self.rasters_path):
+            if f.endswith('.tif'):
+                self.dlg.textBrowser.append(f)
+                self.rasters.append(f)
+
         
     def get_mask(self):
         openFile = QFileDialog()
-        fname = QFileDialog.getOpenFileName(self.dlg, ("Select shape file"), '')
+        shp_file = QFileDialog.getOpenFileName(self.dlg, ("Select shape file"), '')
         
-        layer = QgsVectorLayer(fname, "sub", "ogr")
+        layer = QgsVectorLayer(shp_file, "sub", "ogr")
         features = layer.getFeatures()
 
         idx = layer.fieldNameIndex('location')
         
         for feat in features:
-            attrs = feat.attributes()
-            self.dlg.textBrowser.append(attrs[idx])
+            location = feat.attributes()[idx]
+            self.dlg.textBrowser.append(location)
+            feature_path = join(self.rasters_path, location)
+            mkdir(feature_path)
+            for raster in self.rasters:
+                clip(shape=shp_file,
+                     tiff=join(self.rasters_path, raster),
+                     location=location,
+                     gif_output=join(feature_path, raster)[:-3]+'gif')
 
 
     def unload(self):

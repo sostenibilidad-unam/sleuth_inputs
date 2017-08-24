@@ -9,12 +9,12 @@
 [general]
 name=Sleuth Inputs
 qgisMinimumVersion=2.0
-description=a qgis plugin to prepare sleuth inputs
+description= Prepare SLEUTH urban growth model input layers 
 version=0.1
 author=LANCIS
 email=serranoycandela@gmail.com
 
-about=bla bla
+about= To run the SLEUTH urban growth model in separate subregions, separate folders with layers in apropiate format and with apropiate naming convention are needed, and that is exactly what this plugin does. 
 
 tracker=https://github.com/sostenibilidad-unam/slueth_inputs.git
 repository=https://github.com/sostenibilidad-unam/slueth_inputs.git

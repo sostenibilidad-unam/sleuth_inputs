@@ -28,10 +28,14 @@ import resources
 from sleuth_inputs_dialog import SleuthInputsDialog
 import os.path
 import os
+from qgis.analysis import QgsGeometryAnalyzer 
 from qgis.core import QgsVectorLayer
 from clip import clip
 from os.path import dirname, join, basename
 from os import mkdir
+from processing.core.Processing import Processing
+Processing.initialize()
+from processing.tools import *
 
 class SleuthInputs:
     """QGIS Plugin Implementation."""
@@ -180,31 +184,51 @@ class SleuthInputs:
         self.rasters = []
         openFile = QFileDialog()
         self.rasters_path = QFileDialog.getExistingDirectory(self.dlg, ("Select Output Folder"), '')
-        for f in os.listdir(self.rasters_path):
-            if f.endswith('.tif'):
-                self.dlg.textBrowser.append(f)
-                self.rasters.append(f)
+
+        if self.rasters_path:
+            for f in os.listdir(self.rasters_path):
+                if f.endswith('.tif'):
+                    self.dlg.textBrowser.append(f)
+                    self.rasters.append(f)
+                
+        
+
 
         
     def get_mask(self):
         openFile = QFileDialog()
         shp_file = QFileDialog.getOpenFileName(self.dlg, ("Select shape file"), '')
-        
-        layer = QgsVectorLayer(shp_file, "sub", "ogr")
-        features = layer.getFeatures()
 
-        idx = layer.fieldNameIndex('location')
-        
-        for feat in features:
-            location = feat.attributes()[idx]
-            self.dlg.textBrowser.append(location)
-            feature_path = join(self.rasters_path, location)
-            mkdir(feature_path)
-            for raster in self.rasters:
-                clip(shape=shp_file,
-                     tiff=join(self.rasters_path, raster),
-                     location=location,
-                     gif_output=join(feature_path, raster)[:-3]+'gif')
+        if shp_file:
+            layer = QgsVectorLayer(shp_file, "sub", "ogr")
+            features = layer.getFeatures()
+
+            idx = layer.fieldNameIndex('location')
+            temp_path = join(self.rasters_path, "temp")
+            if not os.path.exists(temp_path):
+                mkdir(temp_path)
+
+            
+            for feat in features:
+                location = feat.attributes()[idx]
+                shapeLocation = os.path.join(temp_path,  location + ".shp")
+                shapeBuffer = os.path.join(temp_path,  location + "_b.shp")
+                print shapeBuffer
+                
+                general.runalg('qgis:extractbyattribute', shp_file, "location", 0, location, shapeLocation)
+                self.dlg.textBrowser.append(location)
+                feature_path = join(self.rasters_path, location)
+                if not os.path.exists(feature_path):
+                    mkdir(feature_path)
+                location_layer = QgsVectorLayer(shapeLocation, "location", "ogr")
+                QgsGeometryAnalyzer().buffer(location_layer, shapeBuffer, 3000, False, False, -1)
+                for raster in self.rasters:
+                    gif_name = raster.replace("General.",location + ".")[:-3]+'gif'
+                    print gif_name
+                    clip(shape=shapeBuffer,
+                         tiff=join(self.rasters_path, raster),
+                         location=location,
+                         gif_output=join(feature_path, gif_name))
 
 
     def unload(self):

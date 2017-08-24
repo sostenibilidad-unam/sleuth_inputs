@@ -1,1 +1,1 @@
-para que no le chilles
+this plugin helps to create folders containing input layers to run SLEUTH urban growth model, for this version general rasters in tif format and a shape file with subregions are needed. A field named “location” in the subregions shape file with intended names for subregions is needed, this will change in future versions, to make it even easier for the user. 

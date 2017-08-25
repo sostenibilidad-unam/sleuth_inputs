@@ -6,4 +6,4 @@ To test the plugin there is a folder named "General" with rasters of Mexico city
 
 <img src="plugin.png" width='50%'>
 
-<img src="output.png" width='50%'>
+<img src="output.png" width='30%'>

@@ -7,3 +7,5 @@ To test the plugin there is a folder named "General" with rasters of Mexico city
 <img src="plugin.png" width='50%'>
 
 <img src="output.png" width='30%'>
+
+This material is based upon work supported by the National Science Foundation under Grant No. 1414052, CNH: The Dynamics of Multi-Scalar Adaptation in Megacities (PI H. Eakin), with additional support from the Inter-American Institute for Global Change Research under Collaborative Research Network-CRN3: “Coping with hydrological risk in megacities: Collaborative planning framework for the Mexico City Metropolitan Area” (Project number: CRN3108).

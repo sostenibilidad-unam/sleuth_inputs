@@ -36,6 +36,7 @@ from os import mkdir
 from processing.core.Processing import Processing
 Processing.initialize()
 from processing.tools import *
+import time
 
 class SleuthInputs:
     """QGIS Plugin Implementation."""
@@ -229,6 +230,13 @@ class SleuthInputs:
                          tiff=join(self.rasters_path, raster),
                          location=location,
                          gif_output=join(feature_path, gif_name))
+
+
+            time.sleep(2)
+            for f in os.listdir(temp_path):
+                os.remove(join(temp_path,f))
+            os.rmdir(temp_path)
+                
 
 
     def unload(self):

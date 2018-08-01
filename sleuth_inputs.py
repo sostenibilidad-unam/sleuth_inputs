@@ -20,17 +20,21 @@
  *                                                                         *
  ***************************************************************************/
 """
-from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
-from PyQt4.QtGui import QAction, QIcon, QFileDialog
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import object
+from qgis.PyQt.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
+from qgis.PyQt.QtWidgets import QAction, QFileDialog
+from qgis.PyQt.QtGui import QIcon
 # Initialize Qt resources from file resources.py
-import resources
+from . import resources
 # Import the code for the dialog
-from sleuth_inputs_dialog import SleuthInputsDialog
+from .sleuth_inputs_dialog import SleuthInputsDialog
 import os.path
 import os
 from qgis.analysis import QgsGeometryAnalyzer 
 from qgis.core import QgsVectorLayer
-from clip import clip
+from .clip import clip
 from os.path import dirname, join, basename
 from os import mkdir
 from processing.core.Processing import Processing
@@ -38,7 +42,7 @@ Processing.initialize()
 from processing.tools import *
 import time
 
-class SleuthInputs:
+class SleuthInputs(object):
     """QGIS Plugin Implementation."""
 
     def __init__(self, iface):
@@ -198,7 +202,7 @@ class SleuthInputs:
         
     def get_mask(self):
         openFile = QFileDialog()
-        shp_file = QFileDialog.getOpenFileName(self.dlg, ("Select shape file"), '')
+        shp_file, __, __ = QFileDialog.getOpenFileName(self.dlg, ("Select shape file"), '')
 
         if shp_file:
             layer = QgsVectorLayer(shp_file, "sub", "ogr")
@@ -214,7 +218,8 @@ class SleuthInputs:
                 location = feat.attributes()[idx]
                 shapeLocation = os.path.join(temp_path,  location + ".shp")
                 shapeBuffer = os.path.join(temp_path,  location + "_b.shp")
-                print shapeBuffer
+                # fix_print_with_import
+                print(shapeBuffer)
                 
                 general.runalg('qgis:extractbyattribute', shp_file, "location", 0, location, shapeLocation)
                 self.dlg.textBrowser.append(location)
@@ -225,7 +230,8 @@ class SleuthInputs:
                 QgsGeometryAnalyzer().buffer(location_layer, shapeBuffer, 3000, False, False, -1)
                 for raster in self.rasters:
                     gif_name = raster.replace("General.",location + ".")[:-3]+'gif'
-                    print gif_name
+                    # fix_print_with_import
+                    print(gif_name)
                     clip(shape=shapeBuffer,
                          tiff=join(self.rasters_path, raster),
                          location=location,

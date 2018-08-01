@@ -8,7 +8,7 @@ from processing.core.Processing import Processing
 Processing.initialize()
 from processing.tools import *
 import os
-from PyQt4.QtCore import QFileInfo
+from qgis.PyQt.QtCore import QFileInfo
 from qgis.core import *
 import json
 

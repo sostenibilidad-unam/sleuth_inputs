@@ -18,12 +18,15 @@ def clip(shape, tiff, location, gif_output):
     tif_output = gif_output[:-3] + "tif"
 
     
-
+    if ".excluded." in gif_output:
+        no_data_value = 255
+    else:
+        no_data_value = 0
 
     general.runalg('gdalogr:cliprasterbymasklayer', 
                          tiff,    #INPUT <ParameterRaster>
                          shape,     #MASK <ParameterVector>
-                         0,       #NO_DATA <ParameterString>
+                         no_data_value,       #NO_DATA <ParameterString>
                          False,    #ALPHA_BAND <ParameterBoolean>
                          True,     #CROP_TO_CUTLINE <ParameterBoolean>
                          True,     #KEEP_RESOLUTION <ParameterBoolean>

@@ -222,7 +222,7 @@ class SleuthInputs:
                 if not os.path.exists(feature_path):
                     mkdir(feature_path)
                 location_layer = QgsVectorLayer(shapeLocation, "location", "ogr")
-                QgsGeometryAnalyzer().buffer(location_layer, shapeBuffer, 3000, False, False, -1)
+                QgsGeometryAnalyzer().buffer(location_layer, shapeBuffer, 3000, False, False, -1)#el buffer debe ser parametro
                 for raster in self.rasters:
                     gif_name = raster.replace("General.",location + ".")[:-3]+'gif'
                     print gif_name
@@ -235,7 +235,10 @@ class SleuthInputs:
             time.sleep(2)
             for f in os.listdir(temp_path):
                 os.remove(join(temp_path,f))
-            os.rmdir(temp_path)
+            try:
+                os.rmdir(temp_path)
+            except:
+                pass
                 
 
 

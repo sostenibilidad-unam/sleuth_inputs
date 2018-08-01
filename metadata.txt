@@ -8,7 +8,7 @@
 
 [general]
 name=Sleuth Inputs
-qgisMinimumVersion=2.0
+qgisMinimumVersion=3.0
 description= Prepare SLEUTH urban growth model input layers 
 version=0.1
 author=LANCIS

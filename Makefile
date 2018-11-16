@@ -1,11 +1,11 @@
 #/***************************************************************************
 # SleuthInputs
 #
-# a qgis plugin to prepare sleuth inputs
+# This plugin helps to create folders containing input layers to run SLEUTH urban growth model.
 #							 -------------------
-#		begin				: 2017-06-21
+#		begin				: 2018-11-16
 #		git sha				: $Format:%H$
-#		copyright			: (C) 2017 by LANCIS
+#		copyright			: (C) 2018 by Fidel Serrano-Candela, Rodrigo Garcia-Herrera
 #		email				: serranoycandela@gmail.com
 # ***************************************************************************/
 #
@@ -40,7 +40,7 @@ SOURCES = \
 	__init__.py \
 	sleuth_inputs.py sleuth_inputs_dialog.py
 
-PLUGINNAME = SleuthInputs
+PLUGINNAME = sleuth_inputs
 
 PY_FILES = \
 	__init__.py \
@@ -74,7 +74,7 @@ default: compile
 compile: $(COMPILED_RESOURCE_FILES)
 
 %.py : %.qrc $(RESOURCES_SRC)
-	pyrcc4 -o $*.py  $<
+	pyrcc5 -o $*.py  $<
 
 %.qm : %.ts
 	$(LRELEASE) $<
@@ -113,7 +113,7 @@ deploy: compile doc transcompile
 	cp -vfr i18n $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)
 	cp -vfr $(HELP) $(HOME)/$(QGISDIR)/python/plugins/$(PLUGINNAME)/help
 	# Copy extra directories if any
-  # (temporarily removed)
+	(foreach EXTRA_DIR,(EXTRA_DIRS), cp -R (EXTRA_DIR) (HOME)/(QGISDIR)/python/plugins/(PLUGINNAME)/;)
 
 
 # The dclean target removes compiled python files from plugin directory

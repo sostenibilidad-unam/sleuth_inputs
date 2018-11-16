@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/plugins/SleuthInputs" >
+    <qresource prefix="/plugins/sleuth_inputs" >
         <file>icon.png</file>
     </qresource>
 </RCC>

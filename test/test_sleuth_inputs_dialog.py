@@ -9,12 +9,12 @@
 """
 
 __author__ = 'serranoycandela@gmail.com'
-__date__ = '2017-06-21'
-__copyright__ = 'Copyright 2017, LANCIS'
+__date__ = '2018-11-16'
+__copyright__ = 'Copyright 2018, Fidel Serrano-Candela, Rodrigo Garcia-Herrera'
 
 import unittest
 
-from PyQt4.QtGui import QDialogButtonBox, QDialog
+from PyQt5.QtGui import QDialogButtonBox, QDialog
 
 from sleuth_inputs_dialog import SleuthInputsDialog
 

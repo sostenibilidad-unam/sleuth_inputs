@@ -4,11 +4,12 @@
 ##import shlex
 ##
 ##from osgeo import gdal
-from processing.core.Processing import Processing
-Processing.initialize()
-from processing.tools import *
+#from processing.core.Processing import Processing
+#Processing.initialize()
+#from processing.tools import *
+import processing
 import os
-from PyQt4.QtCore import QFileInfo
+from qgis.PyQt.QtCore import QFileInfo
 from qgis.core import *
 import json
 
@@ -17,29 +18,18 @@ def clip(shape, tiff, location, gif_output):
  
     tif_output = gif_output[:-3] + "tif"
 
-    
-    if ".excluded." in gif_output:
-        no_data_value = 255
-    else:
-        no_data_value = 0
+    processing.run('gdal:cliprasterbymasklayer', 
+                            {'INPUT':tiff,
+                             'MASK':shape,
+                             'NODATA':0,
+                             'ALPHA_BAND':False,
+                             'CROP_TO_CUTLINE':True,
+                             'KEEP_RESOLUTION':True,
+                             'DATA_TYPE':5,
+                             'OUTPUT':tif_output})
 
-    general.runalg('gdalogr:cliprasterbymasklayer', 
-                         tiff,    #INPUT <ParameterRaster>
-                         shape,     #MASK <ParameterVector>
-                         no_data_value,       #NO_DATA <ParameterString>
-                         False,    #ALPHA_BAND <ParameterBoolean>
-                         True,     #CROP_TO_CUTLINE <ParameterBoolean>
-                         True,     #KEEP_RESOLUTION <ParameterBoolean>
-                         5,        #RTYPE <ParameterSelection>
-                         0,        #COMPRESS <ParameterSelection>
-                         1,        #JPEGCOMPRESSION <ParameterNumber>
-                         1,        #ZLEVEL <ParameterNumber>
-                         1,        #PREDICTOR <ParameterNumber>
-                         False,    #TILED <ParameterBoolean>
-                         0,        #BIGTIFF <ParameterSelection>
-                         False,    #TFW <ParameterBoolean>
-                         "",       #EXTRA <ParameterString>
-                         tif_output)     #OUTPUT <OutputRaster>
+
+    
     
    
 
@@ -63,8 +53,8 @@ def clip(shape, tiff, location, gif_output):
             json.dump(extentDict, fp)
     
        #hay que checar nodata!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! en los dos comandos
-    general.runalg('gdalogr:translate',{"INPUT":tif_output,"OUTSIZE":100,"OUTSIZE_PERC":True,"EXPAND":0,"PROJWIN":"%f,%f,%f,%f"%(xmin, xmax, ymin, ymax),"OUTPUT":gif_output})
-
+    #processing.run('gdal:translate',{"INPUT":tif_output,"OUTSIZE":100,"OUTSIZE_PERC":True,"EXPAND":0,"PROJWIN":"%f,%f,%f,%f"%(xmin, xmax, ymin, ymax),"OUTPUT":gif_output})
+    processing.run('gdal:translate', {"INPUT":tif_output,"COPY_SUBDATASETS":False,"DATA_TYPE":0,"OUTPUT":gif_output})
 
 
 

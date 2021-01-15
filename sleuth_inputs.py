@@ -32,14 +32,15 @@ from . import resources
 from .sleuth_inputs_dialog import SleuthInputsDialog
 import os.path
 import os
-from qgis.analysis import QgsGeometryAnalyzer 
+#from qgis.analysis import QgsGeometryAnalyzer
+import processing
 from qgis.core import QgsVectorLayer
 from .clip import clip
 from os.path import dirname, join, basename
 from os import mkdir
-from processing.core.Processing import Processing
-Processing.initialize()
-from processing.tools import *
+#from processing.core.Processing import Processing
+#Processing.initialize()
+#from processing.tools import *
 import time
 
 class SleuthInputs(object):
@@ -77,8 +78,8 @@ class SleuthInputs(object):
         self.menu = self.tr(u'&Sleuth Inputs')
         # TODO: We are going to let the user set this up in a future iteration
         self.toolbar = self.iface.addToolBar(u'SleuthInputs')
-        self.toolbar.setObjectName(u'SleuthInputs')        
-        
+        self.toolbar.setObjectName(u'SleuthInputs')
+
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
         """Get the translation for a string using Qt translation API.
@@ -184,7 +185,7 @@ class SleuthInputs(object):
         self.dlg.pushButton.clicked.connect(self.rasters_path)
         self.dlg.pushButton_2.clicked.connect(self.get_mask)
 
-        
+
     def rasters_path(self):
         self.rasters = []
         openFile = QFileDialog()
@@ -195,39 +196,51 @@ class SleuthInputs(object):
                 if f.endswith('.tif'):
                     self.dlg.textBrowser.append(f)
                     self.rasters.append(f)
-                
-        
 
 
-        
+
+
+
     def get_mask(self):
         openFile = QFileDialog()
-        shp_file, __, __ = QFileDialog.getOpenFileName(self.dlg, ("Select shape file"), '')
+        shp_file, __ = QFileDialog.getOpenFileName(self.dlg, "Select shape file", 'C:', "shp(*.shp)")
 
         if shp_file:
             layer = QgsVectorLayer(shp_file, "sub", "ogr")
             features = layer.getFeatures()
-
-            idx = layer.fieldNameIndex('location')
+            idx= layer.fields().indexFromName('location')
+            #idx = layer.fieldNameIndex('location')
             temp_path = join(self.rasters_path, "temp")
             if not os.path.exists(temp_path):
                 mkdir(temp_path)
 
-            
+
             for feat in features:
                 location = feat.attributes()[idx]
                 shapeLocation = os.path.join(temp_path,  location + ".shp")
                 shapeBuffer = os.path.join(temp_path,  location + "_b.shp")
                 # fix_print_with_import
                 print(shapeBuffer)
-                
-                general.runalg('qgis:extractbyattribute', shp_file, "location", 0, location, shapeLocation)
+                parameters = {'INPUT': shp_file,
+                'FIELD': "location",
+                'OPERATOR': 0,
+                'VALUE': location,
+                'OUTPUT': shapeLocation}
+                processing.run('qgis:extractbyattribute', parameters)
                 self.dlg.textBrowser.append(location)
                 feature_path = join(self.rasters_path, location)
                 if not os.path.exists(feature_path):
                     mkdir(feature_path)
                 location_layer = QgsVectorLayer(shapeLocation, "location", "ogr")
-                QgsGeometryAnalyzer().buffer(location_layer, shapeBuffer, 3000, False, False, -1)
+                #QgsGeometryAnalyzer().buffer(location_layer, shapeBuffer, 3000, False, False, -1)
+                processing.run('native:buffer', {"INPUT": location_layer,
+                                                 "DISTANCE": 3000,
+                                                 'SEGMENTS': 10,
+                                                 'DISSOLVE': False,
+                                                 'END_CAP_STYLE': 0,
+                                                 'JOIN_STYLE': 0,
+                                                 'MITER_LIMIT': 10,
+                                                 "OUTPUT": shapeBuffer})
                 for raster in self.rasters:
                     gif_name = raster.replace("General.",location + ".")[:-3]+'gif'
                     # fix_print_with_import
@@ -240,9 +253,15 @@ class SleuthInputs(object):
 
             time.sleep(2)
             for f in os.listdir(temp_path):
-                os.remove(join(temp_path,f))
-            os.rmdir(temp_path)
-                
+                try:
+                    os.remove(join(temp_path,f))
+                except:
+                    print("warning, not able to delete temporary file")
+            try:
+                os.rmdir(temp_path)
+            except:
+                print("warning, not able to delete temporary folder")
+
 
 
     def unload(self):
